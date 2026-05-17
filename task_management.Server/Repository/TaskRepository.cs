@@ -45,12 +45,10 @@ namespace task_management.Server.Repository
                 return "";
 
             }
-            catch(Exception)
+            catch(Exception ex)
             {
-
+                return $"Error: {ex.Message} | InnerException: {ex.InnerException?.Message}";
             }
-
-            return "Error Encountered";
 
         }
 

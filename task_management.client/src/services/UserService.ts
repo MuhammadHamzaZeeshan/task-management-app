@@ -19,7 +19,7 @@ export const userService = {
         const token = JSON.parse(localStorage.getItem("user") || "{}")?.Token;
 
         try {
-            const response = await fetch("https://localhost:7266/api/user/GetAllUsers", {
+            const response = await fetch("http://localhost:5296/api/user/GetAllUsers", {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",

@@ -1,76 +1,101 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, Home, LogIn, LogOut } from "lucide-react";
+import { Home, LogIn, LogOut, LayoutDashboard, ListChecks, PlusSquare } from "lucide-react";
 import { useAuth } from "@/context/AuthContext"; 
 
 const Sidebar = () => {
-    const [isOpen, setIsOpen] = useState(false);
     const { isLoggedIn, logout } = useAuth();
     const navigate = useNavigate();
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const role = user?.User?.Role;
 
     const handleLogout = () => {
         logout();
         navigate("/auth");
     };
 
+    const activeNavClass = "w-full justify-start gap-2 rounded-lg border border-slate-500 bg-slate-700 text-left text-white";
+    const inactiveNavClass = "w-full justify-start gap-2 rounded-lg text-left text-slate-100 hover:bg-slate-800 hover:text-white";
+
     return (
-        <div className="flex">
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="fixed top-4 left-4 z-50 p-2 bg-gray-800 text-white rounded-full"
-            >
-                <Menu size={24} />
-            </button>
+        <aside className="w-full border-b bg-slate-900 text-slate-100 md:sticky md:top-0 md:h-screen md:w-72 md:border-b-0 md:border-r md:border-slate-800">
+            <div className="p-5 md:p-6">
+                <h2 className="text-lg font-semibold tracking-wide">Task Manager</h2>
+            </div>
 
-            <div
-                className={`fixed top-0 left-0 h-full bg-gray-900 text-white w-64 p-5 transform ${isOpen ? "translate-x-0" : "-translate-x-full"
-                    } transition-transform duration-300`}
-            >
-                <h2 className="text-lg font-bold mb-6 text-center">Menu</h2>
-
-                <ul className="space-y-4">
+            <nav className="px-4 pb-5 md:px-5">
+                <ul className="space-y-2">
                     <li>
-                        <Link to="/">
-                            <Button variant="ghost" className="flex items-center gap-2 w-full text-left">
-                                <Home size={20} /> Home
-                            </Button>
-                        </Link>
+                        <NavLink to="/">
+                            {({ isActive }) => (
+                                <Button variant="ghost" className={isActive ? activeNavClass : inactiveNavClass}>
+                                    <Home size={18} /> Home
+                                </Button>
+                            )}
+                        </NavLink>
                     </li>
 
                     {!isLoggedIn && (
+                        <li>
+                            <NavLink to="/auth">
+                                {({ isActive }) => (
+                                    <Button variant="ghost" className={isActive ? activeNavClass : inactiveNavClass}>
+                                        <LogIn size={18} /> Sign In / Register
+                                    </Button>
+                                )}
+                            </NavLink>
+                        </li>
+                    )}
+
+                    {isLoggedIn && role === "USER" && (
                         <>
                             <li>
-                                <Link to="/auth">
-                                    <Button variant="ghost" className="flex items-center gap-2 w-full text-left">
-                                        <LogIn size={20} /> Sign In
-                                    </Button>
-                                </Link>
+                                <NavLink to="/userHome">
+                                    {({ isActive }) => (
+                                        <Button variant="ghost" className={isActive ? activeNavClass : inactiveNavClass}>
+                                            <ListChecks size={18} /> My Tasks
+                                        </Button>
+                                    )}
+                                </NavLink>
                             </li>
                             <li>
-                                <Link to="/auth">
-                                    <Button variant="ghost" className="flex items-center gap-2 w-full text-left">
-                                        <LogIn size={20} /> Register
-                                    </Button>
-                                </Link>
+                                <NavLink to="/createTask">
+                                    {({ isActive }) => (
+                                        <Button variant="ghost" className={isActive ? activeNavClass : inactiveNavClass}>
+                                            <PlusSquare size={18} /> Create Task
+                                        </Button>
+                                    )}
+                                </NavLink>
                             </li>
                         </>
                     )}
 
-                    {isLoggedIn && (
+                    {isLoggedIn && role === "ADMIN" && (
                         <li>
+                            <NavLink to="/dashboard">
+                                {({ isActive }) => (
+                                    <Button variant="ghost" className={isActive ? activeNavClass : inactiveNavClass}>
+                                        <LayoutDashboard size={18} /> Dashboard
+                                    </Button>
+                                )}
+                            </NavLink>
+                        </li>
+                    )}
+
+                    {isLoggedIn && (
+                        <li className="pt-2">
                             <Button
-                                variant="ghost"
-                                className="flex items-center gap-2 w-full text-left"
+                                variant="outline"
+                                className="w-full justify-start gap-2 border-slate-600 bg-transparent text-slate-100 hover:bg-slate-800 hover:text-white"
                                 onClick={handleLogout}
                             >
-                                <LogOut size={20} /> Logout
+                                <LogOut size={18} /> Logout
                             </Button>
                         </li>
                     )}
                 </ul>
-            </div>
-        </div>
+            </nav>
+        </aside>
     );
 };
 

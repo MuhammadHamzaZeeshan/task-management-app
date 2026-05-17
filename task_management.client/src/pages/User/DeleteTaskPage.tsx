@@ -46,7 +46,7 @@ const TaskDeletePage = () => {
 
                 const token = JSON.parse(localStorage.getItem("user") || "{}")?.Token;
 
-                const response = await fetch(`https://localhost:7266/api/task/GetTaskById/${id}`, {
+                const response = await fetch(`http://localhost:5296/api/task/GetTaskById/${id}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -81,7 +81,7 @@ const TaskDeletePage = () => {
 
             const token = JSON.parse(localStorage.getItem("user") || "{}")?.Token;
 
-            const response = await fetch(`https://localhost:7266/api/task/Delete/${id}`, {
+            const response = await fetch(`http://localhost:5296/api/task/Delete/${id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -139,7 +139,7 @@ const TaskDeletePage = () => {
                             <p>{error || "Task not found"}</p>
                         </CardContent>
                         <CardFooter>
-                            <Link to="/tasks">
+                            <Link to="/userHome">
                                 <Button>
                                     <ArrowLeft className="mr-2 h-4 w-4" />
                                     Back to Task List
@@ -185,7 +185,7 @@ const TaskDeletePage = () => {
                         </div>
                     </CardContent>
                     <CardFooter className="flex justify-between gap-2">
-                        <Button variant="outline" onClick={() => navigate("/tasks")}>
+                        <Button variant="outline" onClick={() => navigate("/userHome")}>
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Cancel
                         </Button>

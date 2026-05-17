@@ -22,7 +22,6 @@ export interface CreateTaskDto {
     StatusId: number;
     CategoryId: number;
     IsActive: boolean;
-    CreatedOn: string;
 }
 
 interface ApiResponse<T = unknown> {
@@ -38,7 +37,7 @@ export const taskService = {
         const token = JSON.parse(localStorage.getItem("user") || "{}")?.Token;
 
         try {
-            const response = await fetch("https://localhost:7266/api/task/GetAll", {
+            const response = await fetch("http://localhost:5296/api/task/GetAll", {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -73,7 +72,7 @@ export const taskService = {
             
             const userId = user.User.ID;
             console.log("UserId : ", userId);
-            const response = await fetch(`https://localhost:7266/api/task/GetUserTasks/${userId}`, {
+            const response = await fetch(`http://localhost:5296/api/task/GetUserTasks/${userId}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -101,8 +100,9 @@ export const taskService = {
 
     createTask: async (taskData: CreateTaskDto): Promise<ApiResponse> => {
         const token = JSON.parse(localStorage.getItem("user") || "{}")?.Token;
+        console.log("Auth Token:", token ? "Present" : "Missing");
         try {
-            const response = await fetch("https://localhost:7266/api/task/Create", {
+            const response = await fetch("http://localhost:5296/api/task/Create", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -112,6 +112,8 @@ export const taskService = {
             });
 
             if (!response.ok) {
+                const errorText = await response.text();
+                console.error("Backend Error Response:", errorText);
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
@@ -127,7 +129,7 @@ export const taskService = {
     updateTask: async (taskData: CreateTaskDto): Promise<ApiResponse> => {
         const token = JSON.parse(localStorage.getItem("user") || "{}")?.Token;
         try {
-            const response = await fetch("https://localhost:7266/api/task/Update", {
+            const response = await fetch("http://localhost:5296/api/task/Update", {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",

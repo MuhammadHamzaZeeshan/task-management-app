@@ -1,0 +1,1 @@
+D:\task-management-app\task_management.client\obj\Debug\task_management.client.esproj.CoreCompileInputs.cache

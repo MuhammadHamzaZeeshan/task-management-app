@@ -5,7 +5,6 @@ interface SignUpData {
     Email: string;
     Password: string;
     IsActive?: boolean;
-    CreatedOn?: string;
 }
 
 interface SignInData {
@@ -23,7 +22,7 @@ export const authService = {
     // User Sign Up
     async signUp(signUpData: SignUpData): Promise<ApiResponse> {
 
-        const api_url = "https://localhost:7266/api/auth/register";
+        const api_url = "http://localhost:5296/api/auth/register";
 
         try {
             console.log(signUpData);
@@ -51,7 +50,7 @@ export const authService = {
     // User Sign In
     async signIn(signInData: SignInData): Promise<ApiResponse> {
 
-        const api_url = "https://localhost:7266/api/auth/login";
+        const api_url = "http://localhost:5296/api/auth/login";
 
         try {
             const response = await fetch(api_url, {

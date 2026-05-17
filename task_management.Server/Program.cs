@@ -118,5 +118,29 @@ void ApplyMigration()
         {
             _db.Database.Migrate();
         }
+
+        // Seed default statuses if they don't exist
+        if (!_db.TaskStatuses.Any())
+        {
+            _db.TaskStatuses.AddRange(
+                new task_management.Server.Models.TaskStatus { StatusName = "Pending", IsActive = true, CreatedOn = DateTime.Now },
+                new task_management.Server.Models.TaskStatus { StatusName = "In Progress", IsActive = true, CreatedOn = DateTime.Now },
+                new task_management.Server.Models.TaskStatus { StatusName = "Completed", IsActive = true, CreatedOn = DateTime.Now },
+                new task_management.Server.Models.TaskStatus { StatusName = "On Hold", IsActive = true, CreatedOn = DateTime.Now }
+            );
+            _db.SaveChanges();
+        }
+
+        // Seed default categories if they don't exist
+        if (!_db.TaskCategories.Any())
+        {
+            _db.TaskCategories.AddRange(
+                new task_management.Server.Models.TaskCategory { CategoryName = "Work", IsActive = true, CreatedOn = DateTime.Now },
+                new task_management.Server.Models.TaskCategory { CategoryName = "Personal", IsActive = true, CreatedOn = DateTime.Now },
+                new task_management.Server.Models.TaskCategory { CategoryName = "Shopping", IsActive = true, CreatedOn = DateTime.Now },
+                new task_management.Server.Models.TaskCategory { CategoryName = "Health", IsActive = true, CreatedOn = DateTime.Now }
+            );
+            _db.SaveChanges();
+        }
     }
 }

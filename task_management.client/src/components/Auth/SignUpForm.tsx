@@ -11,15 +11,21 @@ import * as z from "zod"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { User, Mail, Lock, ShieldCheck } from "lucide-react"
 
 import { authService } from "@/services/AuthService"
+import { useToast } from "@/context/ToastContext"
 
 // Sign Up Form Schema
 const signUpFormSchema = z
   .object({
     name: z.string().min(2, { message: "Name must be at least 2 characters." }),
     email: z.string().email({ message: "Please enter a valid email address." }),
-    password: z.string().min(8, { message: "Password must be at least 8 characters." }),
+    password: z.string()
+      .min(8, { message: "Password must be at least 8 characters." })
+      .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter." })
+      .regex(/[0-9]/, { message: "Password must contain at least one digit." })
+      .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, { message: "Password must contain at least one special character." }),
     confirmPassword: z.string().min(8, { message: "Password must be at least 8 characters." }),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -33,6 +39,7 @@ export default function SignUpForm() {
 
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { showToast } = useToast();
 
   const signUpForm = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpFormSchema),
@@ -53,18 +60,17 @@ export default function SignUpForm() {
               Email: data.email,
               Password: data.password,
               IsActive: true,
-              CreatedOn: new Date().toISOString(),
           })
 
           if (response.IsSuccess) {
-              alert("User registered successfully!")
+              showToast("User registered successfully!", "success")
               navigate("/auth") // Redirect to SignIn page
           } else {
-              alert(response.Message)
+              showToast(response.Message, "error")
           }
       } catch (error) {
           console.error("Signup failed:", error)
-          alert("Failed to register user")
+          showToast("Failed to register user", "error")
       } finally {
           setIsSubmitting(false)
       }
@@ -72,15 +78,19 @@ export default function SignUpForm() {
 
   return (
     <Form {...signUpForm}>
-      <form onSubmit={signUpForm.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={signUpForm.handleSubmit(onSubmit)} className="space-y-6">
+        <p className="text-sm text-slate-500">Create your account details below.</p>
         <FormField
           control={signUpForm.control}
           name="name"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="gap-1.5">
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="John Doe" {...field} />
+                <div className="relative">
+                  <User className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
+                  <Input placeholder="John Doe" className="h-11 pl-10" {...field} />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -90,10 +100,13 @@ export default function SignUpForm() {
           control={signUpForm.control}
           name="email"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="gap-1.5">
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="example@example.com" {...field} />
+                <div className="relative">
+                  <Mail className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
+                  <Input placeholder="example@example.com" className="h-11 pl-10" {...field} />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -103,10 +116,13 @@ export default function SignUpForm() {
           control={signUpForm.control}
           name="password"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="gap-1.5">
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
+                <div className="relative">
+                  <Lock className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
+                  <Input type="password" placeholder="Create a password" className="h-11 pl-10" {...field} />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -116,16 +132,19 @@ export default function SignUpForm() {
           control={signUpForm.control}
           name="confirmPassword"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="gap-1.5">
               <FormLabel>Confirm Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
+                <div className="relative">
+                  <ShieldCheck className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
+                  <Input type="password" placeholder="Confirm password" className="h-11 pl-10" {...field} />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button type="submit" className="h-11 w-full text-base" disabled={isSubmitting}>
                   {isSubmitting ? "Creating Account..." : "Create Account"}
               </Button>
       </form>

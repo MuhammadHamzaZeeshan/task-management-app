@@ -5,7 +5,7 @@ import { useParams, Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, CalendarClock, Clock3, FolderKanban, ShieldCheck } from "lucide-react"
 
 interface TaskDto {
     TaskId: number;
@@ -31,6 +31,7 @@ const TaskDetailPage = () => {
     const [task, setTask] = useState<TaskDto | null>(null)
     const [loading, setLoading] = useState<boolean>(true)
     const [error, setError] = useState<string | null>(null)
+    const [createdByName, setCreatedByName] = useState<string>("")
 
     useEffect(() => {
         // Simulate API call to fetch task details
@@ -40,7 +41,7 @@ const TaskDetailPage = () => {
 
                 const token = JSON.parse(localStorage.getItem("user") || "{}")?.Token;
 
-                const response = await fetch(`https://localhost:7266/api/task/GetTaskById/${id}`, {
+                const response = await fetch(`http://localhost:5296/api/task/GetTaskById/${id}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -68,6 +69,36 @@ const TaskDetailPage = () => {
 
         fetchTaskDetails()
     }, [id])
+
+    // Fetch the created by user's name
+    useEffect(() => {
+        if (task?.CreatedBy) {
+            const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+            if (currentUser?.User?.ID === task.CreatedBy) {
+                setCreatedByName(currentUser.User.Name);
+            } else {
+                // Fetch user info from backend
+                const fetchUserName = async () => {
+                    try {
+                        const token = JSON.parse(localStorage.getItem("user") || "{}")?.Token;
+                        const response = await fetch(`http://localhost:5296/api/user/GetUser/${task.CreatedBy}`, {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        });
+                        if (response.ok) {
+                            const data = await response.json();
+                            setCreatedByName(data.Result?.Name || "Unknown User");
+                        }
+                    } catch (err) {
+                        console.error("Failed to fetch user name:", err);
+                        setCreatedByName("Unknown User");
+                    }
+                };
+                fetchUserName();
+            }
+        }
+    }, [task?.CreatedBy])
 
     // Helper functions to convert IDs to readable text
     const getStatusText = (statusId: number): string => {
@@ -99,17 +130,17 @@ const TaskDetailPage = () => {
     const getPriorityText = (priority: number): string => {
         switch (priority) {
             case 1:
-                return "1 - Lowest"
+                return "Lowest"
             case 2:
-                return "2 - Low"
+                return "Low"
             case 3:
-                return "3 - Medium"
+                return "Medium"
             case 4:
-                return "4 - High"
+                return "High"
             case 5:
-                return "5 - Highest"
+                return "Highest"
             default:
-                return `${priority} - Unknown`
+                return "Unknown"
         }
     }
 
@@ -153,7 +184,7 @@ const TaskDetailPage = () => {
                             <p>{error || "Task not found"}</p>
                         </CardContent>
                         <CardFooter>
-                            <Link to="/tasks">
+                            <Link to="/userHome">
                                 <Button>
                                     <ArrowLeft className="mr-2 h-4 w-4" />
                                     Back to Task List
@@ -167,94 +198,90 @@ const TaskDetailPage = () => {
     }
 
     return (
-        <div className="container mx-auto p-6">
-            <div className="max-w-2xl mx-auto">
-                <Card>
-                    <CardHeader>
-                        <div className="flex justify-between items-center">
-                            <CardTitle className="text-2xl font-bold">Task Details</CardTitle>
-                            <Badge
-                                className={
-                                    task.StatusId === 3
-                                        ? "bg-green-100 text-green-800"
-                                        : task.StatusId === 2
-                                            ? "bg-blue-100 text-blue-800"
-                                            : "bg-yellow-100 text-yellow-800"
-                                }
-                            >
-                                {getStatusText(task.StatusId)}
-                            </Badge>
-                        </div>
+        <div className="mx-auto max-w-6xl p-4 md:p-6">
+            <div className="mb-5 rounded-2xl border bg-white p-5 shadow-sm md:p-6">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Work Item #{task.TaskId}</p>
+                        <h2 className="text-2xl font-bold text-slate-800">{task.Title}</h2>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        <Badge className="bg-slate-100 text-slate-700">{getPriorityText(task.Priority)}</Badge>
+                        <Badge className="bg-blue-100 text-blue-700">{getCategoryText(task.CategoryId)}</Badge>
+                        <Badge
+                            className={
+                                task.StatusId === 3
+                                    ? "bg-emerald-100 text-emerald-700"
+                                    : task.StatusId === 2
+                                        ? "bg-amber-100 text-amber-700"
+                                        : "bg-slate-100 text-slate-700"
+                            }
+                        >
+                            {getStatusText(task.StatusId)}
+                        </Badge>
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid gap-5 lg:grid-cols-3">
+                <Card className="border-slate-200 bg-white shadow-xl lg:col-span-2">
+                    <CardHeader className="border-b bg-slate-50/70 pb-4">
+                        <CardTitle className="text-xl font-semibold text-slate-800">Overview</CardTitle>
                     </CardHeader>
-                    <CardContent className="p-6">
-                        <div className="space-y-6">
-                            <div>
-                                <h3 className="text-lg font-semibold mb-1">Task ID</h3>
-                                <p>{task.TaskId}</p>
+                    <CardContent className="space-y-4 p-6 md:p-7">
+                        <div>
+                            <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">Notes</h3>
+                            <p className="whitespace-pre-line rounded-lg border bg-slate-50 p-4 text-slate-700">{task.Description}</p>
+                        </div>
+
+                        <div className="grid gap-4 md:grid-cols-2">
+                            <div className="rounded-lg border bg-white p-4">
+                                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Owner</p>
+                                <p className="mt-1 font-medium text-slate-800">{createdByName || "Loading..."}</p>
                             </div>
-
-                            <div>
-                                <h3 className="text-lg font-semibold mb-1">Title</h3>
-                                <p>{task.Title}</p>
-                            </div>
-
-                            <div>
-                                <h3 className="text-lg font-semibold mb-1">Description</h3>
-                                <p className="whitespace-pre-line">{task.Description}</p>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <h3 className="text-lg font-semibold mb-1">Priority</h3>
-                                    <p>{getPriorityText(task.Priority)}</p>
-                                </div>
-
-                                <div>
-                                    <h3 className="text-lg font-semibold mb-1">Created By</h3>
-                                    <p>{task.CreatedBy}</p>
-                                </div>
-
-                                <div>
-                                    <h3 className="text-lg font-semibold mb-1">Task Completion Date</h3>
-                                    <p>{formatDate(task.TaskCompletionDate)}</p>
-                                </div>
-
-                                <div>
-                                    <h3 className="text-lg font-semibold mb-1">Status</h3>
-                                    <p>
-                                        {getStatusText(task.StatusId)} (ID: {task.StatusId})
-                                    </p>
-                                </div>
-
-                                <div>
-                                    <h3 className="text-lg font-semibold mb-1">Category</h3>
-                                    <p>
-                                        {getCategoryText(task.CategoryId)} (ID: {task.CategoryId})
-                                    </p>
-                                </div>
-
-                                <div>
-                                    <h3 className="text-lg font-semibold mb-1">Active Status</h3>
-                                    <p>{task.IsActive ? "Active" : "Inactive"}</p>
-                                </div>
-
-                                <div>
-                                    <h3 className="text-lg font-semibold mb-1">Created On</h3>
-                                    <p>{formatDate(task.CreatedOn)}</p>
-                                </div>
+                            <div className="rounded-lg border bg-white p-4">
+                                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Active State</p>
+                                <p className="mt-1 font-medium text-slate-800">{task.IsActive ? "Active" : "Inactive"}</p>
                             </div>
                         </div>
                     </CardContent>
-                    <CardFooter>
-                        <Link to="/tasks">
-                            <Button>
-                                <ArrowLeft className="mr-2 h-4 w-4" />
-                                Back to Task List
-                            </Button>
-                        </Link>
-                    </CardFooter>
+                </Card>
+
+                <Card className="border-slate-200 bg-white shadow-xl">
+                    <CardHeader className="border-b bg-slate-50/70 pb-4">
+                        <CardTitle className="text-xl font-semibold text-slate-800">Timeline & System</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3 p-6">
+                        <div className="rounded-lg border p-3">
+                            <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500"><CalendarClock size={14} /> Due At</p>
+                            <p className="mt-1 text-sm font-medium text-slate-800">{formatDate(task.TaskCompletionDate)}</p>
+                        </div>
+                        <div className="rounded-lg border p-3">
+                            <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500"><Clock3 size={14} /> Created On</p>
+                            <p className="mt-1 text-sm font-medium text-slate-800">{formatDate(task.CreatedOn)}</p>
+                        </div>
+                        <div className="rounded-lg border p-3">
+                            <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500"><FolderKanban size={14} /> Category</p>
+                            <p className="mt-1 text-sm font-medium text-slate-800">{getCategoryText(task.CategoryId)}</p>
+                        </div>
+                        <div className="rounded-lg border p-3">
+                            <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500"><ShieldCheck size={14} /> Status</p>
+                            <p className="mt-1 text-sm font-medium text-slate-800">{getStatusText(task.StatusId)}</p>
+                        </div>
+                    </CardContent>
                 </Card>
             </div>
+
+            <Card className="mt-5 border-slate-200 bg-white shadow-xl">
+                <CardFooter className="px-6 py-4">
+                    <Link to="/userHome">
+                        <Button variant="outline">
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            Back to List
+                        </Button>
+                    </Link>
+                </CardFooter>
+            </Card>
         </div>
     )
 }
