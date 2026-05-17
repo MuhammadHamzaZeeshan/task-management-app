@@ -189,14 +189,14 @@ Frontend runs at `http://localhost:5173`.
 ```json
 "ApiSettings": {
   "JwtOptions": {
-    "Secret": "YOUR_SECRET_KEY_HERE",
+      "Secret": "REPLACE_WITH_A_LOCAL_DEV_JWT_SECRET",
     "Issuer": "taskManagement-auth-api",
     "Audience": "taskManagement-client"
   }
 }
 ```
 
-Replace the `Secret` with a strong, unique key before deploying to production.
+Override `ApiSettings:JwtOptions:Secret` with an environment variable or user-secrets value before using anything beyond local development. In .NET, the equivalent environment variable name is `ApiSettings__JwtOptions__Secret`.
 
 ### CORS
 
@@ -215,20 +215,20 @@ policy.WithOrigins("https://localhost:YOUR_PORT")
 **Register:**
 ```
 POST /api/auth/register
-{ "Name": "John Doe", "Email": "john@example.com", "Password": "SecurePassword123!" }
+{ "Name": "Your Name", "Email": "you@example.com", "Password": "YourPassword123!" }
 ```
 
 **Login:**
 ```
 POST /api/auth/login
-{ "Email": "john@example.com", "Password": "SecurePassword123!" }
+{ "Email": "you@example.com", "Password": "YourPassword123!" }
 ```
 Returns a JWT token and user info including role.
 
 **Create Admin:**
 ```
 POST /api/auth/CreateAdmin
-{ "Email": "admin@example.com", "Name": "Admin User", "Password": "AdminPassword123!" }
+{ "Email": "admin@example.com", "Name": "Admin User", "Password": "YourAdminPassword123!" }
 ```
 
 ### Tasks (`/api/task`) — Requires Bearer Token
