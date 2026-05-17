@@ -1,4 +1,4 @@
-# Task Management Application
+# Pearls: Task Management Application
 
 A full-stack web application for organizing, tracking, and managing tasks — built with ASP.NET Core and React.js.
 
@@ -140,7 +140,7 @@ TaskCategory    (1) ──→ (Many) Tasks
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/task-management-app.git
+   git clone https://github.com/MuhammadHamzaZeeshan/task-management-app.git 
    cd task-management-app
    ```
 
